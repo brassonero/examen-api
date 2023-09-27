@@ -19,14 +19,14 @@ public class Respuesta {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "estudiante_id")
+    @JoinColumn(name = "id_estudiante")
     private Estudiante estudiante;
 
     @ManyToOne
-    @JoinColumn(name = "pregunta_id")
+    @JoinColumn(name = "id_pregunta")
     private Pregunta pregunta;
 
     @ManyToOne
-    @JoinColumn(name = "opcion_id")
+    @JoinColumn(name = "id_opcion")
     private Opcion opcion;
 }

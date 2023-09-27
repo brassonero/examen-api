@@ -22,7 +22,7 @@ public class Opcion {
     private Boolean esCorrecta;
 
     @ManyToOne
-    @JoinColumn(name = "pregunta_id")
+    @JoinColumn(name = "id_pregunta")
     @JsonBackReference
     private Pregunta pregunta;
 }

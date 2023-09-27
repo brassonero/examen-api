@@ -46,5 +46,4 @@ public class ControllerAdvisor extends ResponseEntityExceptionHandler {
 		log.error("Exception location: {}", errorResponse.getDescription());
 		log.error("An exception occurred: {}", exception.getMessage());
 	}
-
 }

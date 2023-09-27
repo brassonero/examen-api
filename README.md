@@ -76,21 +76,21 @@ La aplicación expone un conjunto de APIs RESTful para permitir la interacción 
 
 1.  **/api/examenes**
     
-    -   Métodos: POST
+    -   Método: POST
     -   Descripción: Permite la creación de nuevos exámenes.
 2.  **/api/estudiantes**
     
-    -   Métodos: POST
+    -   Método: POST
     -   Descripción: Permite la creación de nuevos estudiantes.
 3.  **/api/asignaciones**
     
-    -   Métodos: POST
+    -   Método: POST
     -   Descripción: Asigna un examen específico a un estudiante.
 4.  **/api/respuestas**
     
-    -   Métodos: POST
+    -   Método: POST
     -   Descripción: Permite a los estudiantes enviar respuestas para un examen.
 5.  **/api/calificacion**
     
-    -   Métodos: GET
+    -   Método: GET
     -   Descripción: Obtiene la calificación de un estudiante en un examen específico.

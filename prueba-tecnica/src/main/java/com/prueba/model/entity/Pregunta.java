@@ -20,7 +20,7 @@ public class Pregunta {
     private Integer puntaje;
 
     @ManyToOne
-    @JoinColumn(name = "examen_id")
+    @JoinColumn(name = "id_examen")
     @JsonBackReference
     private Examen examen;
 

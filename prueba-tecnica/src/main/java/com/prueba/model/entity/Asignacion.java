@@ -19,10 +19,10 @@ public class Asignacion {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "estudiante_id")
+    @JoinColumn(name = "id_estudiante")
     private Estudiante estudiante;
 
     @ManyToOne
-    @JoinColumn(name = "examen_id")
+    @JoinColumn(name = "id_examen")
     private Examen examen;
 }

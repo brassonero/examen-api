@@ -38,11 +38,11 @@ public class OpenApiConfig {
     public OpenAPI springOpenAPI(BuildProperties buildProperties) {
         return new OpenAPI()
                 .info(new Info().title("prueba-tecnica")
-                        .description("Prueba técnica")
+                        .description("Prueba Técnica")
                         .version(buildProperties.getVersion())
                         .license(new License().name("Apache 2.0").url("http://springdoc.org")))
                 .externalDocs(new ExternalDocumentation()
-                        .description("@brassonero")
-                        .url("https://www.linkedin.com/in/brassonero"));
+                        .description("README")
+                        .url("https://gist.github.com/brassonero/a0b0aa9dd9b125b808bc0e7bc9e1b52f"));
     }
 }
