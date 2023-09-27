@@ -30,7 +30,7 @@ public class OpenApiConfig {
     public GroupedOpenApi publicApi() {
         return GroupedOpenApi.builder()
                 .group("public")
-                .pathsToMatch("/v1/**")
+                .pathsToMatch("/api/**")
                 .build();
     }
 
@@ -43,6 +43,6 @@ public class OpenApiConfig {
                         .license(new License().name("Apache 2.0").url("http://springdoc.org")))
                 .externalDocs(new ExternalDocumentation()
                         .description("@brassonero")
-                        .url("https://www.instagram.com/brassonero"));
+                        .url("https://www.linkedin.com/in/brassonero"));
     }
 }

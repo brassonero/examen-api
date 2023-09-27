@@ -7,12 +7,12 @@ import lombok.ToString;
 
 import javax.persistence.*;
 
-@Entity
-@Table(name = "Respuesta")
 @Getter
 @Setter
 @ToString
 @RequiredArgsConstructor
+@Entity
+@Table(name = "Respuesta")
 public class Respuesta {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,6 +21,10 @@ public class Respuesta {
     @ManyToOne
     @JoinColumn(name = "estudiante_id")
     private Estudiante estudiante;
+
+    @ManyToOne
+    @JoinColumn(name = "pregunta_id")
+    private Pregunta pregunta;
 
     @ManyToOne
     @JoinColumn(name = "opcion_id")

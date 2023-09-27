@@ -20,6 +20,7 @@ public class Opcion {
     private Long id;
     private String texto;
     private Boolean esCorrecta;
+
     @ManyToOne
     @JoinColumn(name = "pregunta_id")
     @JsonBackReference

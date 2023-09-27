@@ -15,6 +15,13 @@
 	<description>prueba-tecnica</description>
 	<properties>
 		<java.version>11</java.version>
+		<jacoco.version>0.8.8</jacoco.version>
+		<spring-cloud.version>2021.0.4</spring-cloud.version>
+		<sonar.login></sonar.login>
+		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+		<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
+		<sonar.jacoco.reportPath>${project.basedir}/../target/jacoco.exec</sonar.jacoco.reportPath>
+		<sonar.language>java</sonar.language>
 	</properties>
 
 	<dependencies>
