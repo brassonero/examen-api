@@ -1,7 +1,6 @@
 package com.prueba.utils;
 
 import com.prueba.model.dto.ExamenRequest;
-import com.prueba.model.dto.ExamenResponse;
 import com.prueba.model.dto.OpcionDTO;
 import com.prueba.model.dto.PreguntaDTO;
 import com.prueba.model.entity.Examen;
