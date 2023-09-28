@@ -9,14 +9,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
+import com.prueba.exception.ExamNotFoundException;
+import com.prueba.exception.OptionNotFoundException;
+import com.prueba.exception.StudentNotFoundException;
 import com.prueba.model.dto.*;
 import com.prueba.model.entity.*;
 import com.prueba.model.repository.*;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import javax.persistence.EntityNotFoundException;
 
 import static com.prueba.constants.Constants.*;
 import static com.prueba.utils.Util.convertToExamenEntity;
@@ -36,15 +37,16 @@ public class ExamenService {
 
         Examen examen = convertToExamenEntity(request);
 
-        int numeroDePreguntas = Optional.ofNullable(examen.getPreguntas()).orElse(Collections.emptyList()).size();
+        log.info("Creando examen...");
 
-        if (numeroDePreguntas == 0){
+        int numeroDePreguntas = Optional.ofNullable(examen.getPreguntas()).orElse(Collections.emptyList()).size();
+        if (numeroDePreguntas == 0) {
+            log.error("El examen debe tener al menos una pregunta.");
             throw new IllegalArgumentException("El examen debe tener al menos una pregunta.");
         }
 
         int puntajeBase = 100 / numeroDePreguntas;
         int puntosExtras = 100 % numeroDePreguntas;
-
         Optional.ofNullable(examen.getPreguntas()).ifPresent(preguntas -> preguntas.forEach(pregunta -> {
             pregunta.setExamen(examen);
             pregunta.setPuntaje(puntajeBase);
@@ -65,6 +67,7 @@ public class ExamenService {
                 .sum();
 
         if (totalPuntos != 100) {
+            log.error("Los puntajes de las preguntas deben sumar 100.");
             throw new IllegalArgumentException("Los puntajes de las preguntas deben sumar 100.");
         }
 
@@ -74,6 +77,8 @@ public class ExamenService {
         examen.setFechaExamen(bogotaZonedDateTime.toLocalDateTime());
 
         Examen savedExamen = examenRepository.save(examen);
+
+        log.info("Examen creado exitosamente.");
         return convertToExamenResponse(savedExamen);
     }
 
@@ -85,8 +90,10 @@ public class ExamenService {
         estudiante.setCiudad(request.getCiudad());
         estudiante.setZonaHoraria(request.getZonaHoraria());
 
+        log.info("Creando estudiante [{}].", request.getNombre());
         Estudiante savedEstudiante = estudianteRepository.save(estudiante);
 
+        log.info("Estudiante creado exitosamente.");
         return EstudianteResponse.builder()
                 .id(savedEstudiante.getId())
                 .nombre(savedEstudiante.getNombre())
@@ -95,10 +102,12 @@ public class ExamenService {
 
     public AsignacionResponse asignarExamen(Long idEstudiante, Long idExamen) {
 
+        log.info("Asignando examen [{}] al estudiante [{}].", idExamen, idEstudiante);
+
         Estudiante estudiante = estudianteRepository.findById(idEstudiante)
-                .orElseThrow(() -> new RuntimeException(STUDENT_NOT_FOUND));
+                .orElseThrow(() -> new StudentNotFoundException(STUDENT_NOT_FOUND));
         Examen examen = examenRepository.findById(idExamen)
-                .orElseThrow(() -> new RuntimeException(EXAM_NOT_FOUND));
+                .orElseThrow(() -> new ExamNotFoundException(EXAM_NOT_FOUND));
 
         Asignacion asignacion = new Asignacion();
         asignacion.setEstudiante(estudiante);
@@ -106,6 +115,7 @@ public class ExamenService {
 
         Asignacion savedAssign = asignacionRepository.save(asignacion);
 
+        log.info("Examen asignado exitosamente.");
         return AsignacionResponse.builder()
                 .id(savedAssign.getId())
                 .examen(ExamenResponse.builder()
@@ -121,16 +131,18 @@ public class ExamenService {
 
     public void guardarRespuestas(Long idEstudiante, Long idExamen, List<Long> idOpciones) {
 
+        log.info("Guardando respuestas...");
+
         Estudiante estudiante = estudianteRepository.findById(idEstudiante)
-                .orElseThrow(() -> new EntityNotFoundException(STUDENT_NOT_FOUND));
+                .orElseThrow(() -> new StudentNotFoundException(STUDENT_NOT_FOUND));
 
         if (!examenRepository.existsById(idExamen)) {
-            throw new EntityNotFoundException(EXAM_NOT_FOUND);
+            throw new ExamNotFoundException(EXAM_NOT_FOUND);
         }
 
         idOpciones.forEach(idOpcion -> {
             Opcion opcion = opcionRepository.findById(idOpcion)
-                    .orElseThrow(() -> new EntityNotFoundException("Opción no encontrada"));
+                    .orElseThrow(() -> new OptionNotFoundException("Opción no encontrada"));
 
             if (!opcion.getPregunta().getExamen().getId().equals(idExamen)) {
                 throw new IllegalArgumentException("El idOpcion " + idOpcion + " no pertenece al idExamen " + idExamen);
@@ -143,15 +155,18 @@ public class ExamenService {
 
             respuestaRepository.save(respuesta);
         });
+        log.info("Respuestas guardadas exitosamente.");
     }
 
     public CalificacionResponse calcularPuntaje(Long idEstudiante, Long idExamen) {
 
+        log.info("Calculando puntaje para el estudiante [{}] y examen [{}].", idEstudiante, idExamen);
+
         Estudiante estudiante = estudianteRepository.findById(idEstudiante)
-                .orElseThrow(() -> new EntityNotFoundException(STUDENT_NOT_FOUND));
+                .orElseThrow(() -> new StudentNotFoundException(STUDENT_NOT_FOUND));
 
         Examen examen = examenRepository.findById(idExamen)
-                .orElseThrow(() -> new EntityNotFoundException(EXAM_NOT_FOUND));
+                .orElseThrow(() -> new ExamNotFoundException(EXAM_NOT_FOUND));
 
         List<Respuesta> respuestasCorrectas = respuestaRepository.findCorrectRespuestasByEstudianteIdAndExamenId(idEstudiante, idExamen);
 
@@ -159,9 +174,10 @@ public class ExamenService {
                 .mapToInt(respuesta -> respuesta.getPregunta().getPuntaje())
                 .sum();
 
+        log.info("Puntaje calculado exitosamente.");
         return CalificacionResponse.builder()
-                .idEstudiante(idEstudiante)
                 .idExamen(examen.getId())
+                .idEstudiante(estudiante.getId())
                 .nombre(estudiante.getNombre())
                 .calificacion(totalPuntaje)
                 .build();
