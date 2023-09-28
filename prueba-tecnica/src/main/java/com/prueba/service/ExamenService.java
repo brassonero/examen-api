@@ -21,7 +21,6 @@ import org.springframework.stereotype.Service;
 
 import static com.prueba.constants.Constants.*;
 import static com.prueba.utils.Util.convertToExamenEntity;
-import static com.prueba.utils.Util.convertToExamenResponse;
 
 @Slf4j
 @Service
@@ -39,20 +38,22 @@ public class ExamenService {
 
         log.info("Creando examen...");
 
-        int numeroDePreguntas = Optional.ofNullable(examen.getPreguntas()).orElse(Collections.emptyList()).size();
+        int numeroDePreguntas = Optional.ofNullable(examen.getPreguntas())
+                .orElse(Collections.emptyList()).size();
+
         if (numeroDePreguntas == 0) {
             log.error("El examen debe tener al menos una pregunta.");
             throw new IllegalArgumentException("El examen debe tener al menos una pregunta.");
         }
 
         int puntajeBase = 100 / numeroDePreguntas;
-        int puntosExtras = 100 % numeroDePreguntas;
         Optional.ofNullable(examen.getPreguntas()).ifPresent(preguntas -> preguntas.forEach(pregunta -> {
             pregunta.setExamen(examen);
             pregunta.setPuntaje(puntajeBase);
             Optional.ofNullable(pregunta.getOpciones()).ifPresent(opciones -> opciones.forEach(opcion -> opcion.setPregunta(pregunta)));
         }));
 
+        int puntosExtras = 100 % numeroDePreguntas;
         SecureRandom secureRandom = new SecureRandom();
         IntStream.range(0, puntosExtras).forEach(i -> {
             int index = secureRandom.nextInt(Optional.ofNullable(examen.getPreguntas()).orElse(Collections.emptyList()).size());
@@ -79,7 +80,10 @@ public class ExamenService {
         Examen savedExamen = examenRepository.save(examen);
 
         log.info("Examen creado exitosamente.");
-        return convertToExamenResponse(savedExamen);
+        return ExamenResponse.builder()
+                .id(savedExamen.getId())
+                .fechaExamen(savedExamen.getFechaExamen())
+                .build();
     }
 
     public EstudianteResponse crearEstudiante(EstudianteRequest request) {

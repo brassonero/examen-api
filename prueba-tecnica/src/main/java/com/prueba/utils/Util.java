@@ -39,11 +39,4 @@ public class Util {
         opcion.setEsCorrecta(dto.getEsCorrecta());
         return opcion;
     }
-
-    public static ExamenResponse convertToExamenResponse(Examen examen) {
-        return ExamenResponse.builder()
-                .id(examen.getId())
-                .fechaExamen(examen.getFechaExamen())
-                .build();
-    }
 }
