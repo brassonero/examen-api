@@ -1,8 +1,6 @@
 package com.prueba.controller;
 
-import com.prueba.model.dto.CalificacionResponse;
-import com.prueba.model.entity.*;
-import com.prueba.model.repository.EstudianteRepository;
+import com.prueba.model.dto.*;
 import com.prueba.service.ExamenService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
@@ -11,6 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 import static com.prueba.constants.Constants.*;
@@ -20,23 +19,22 @@ import static com.prueba.constants.Constants.*;
 @RequestMapping(BASE_PATH)
 public class ExamenController {
     private final ExamenService examenService;
-    private final EstudianteRepository estudianteRepository;
 
     @Operation(summary = OP_SAVE_EXAM)
     @PostMapping(value = SPECIFICPATHS_SAVE_EXAM, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Examen> createExam(@RequestBody Examen examen) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(examenService.crearExamen(examen));
+    public ResponseEntity<ExamenResponse> createExam(@RequestBody ExamenRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(examenService.crearExamen(request));
     }
 
     @Operation(summary = OP_SAVE_STUDENT)
     @PostMapping(value = SPECIFICPATHS_SAVE_STUDENT, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Estudiante> createStudent(@RequestBody Estudiante estudiante) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(estudianteRepository.save(estudiante));
+    public ResponseEntity<EstudianteResponse> createStudent(@Valid @RequestBody EstudianteRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(examenService.crearEstudiante(request));
     }
 
     @Operation(summary = OP_SAVE_ASSIGN)
     @PostMapping(value = SPECIFICPATHS_SAVE_ASSIGN, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Asignacion> assignExam(
+    public ResponseEntity<AsignacionResponse> assignExam(
             @RequestParam Long idEstudiante,
             @RequestParam Long idExamen) {
         return ResponseEntity.status(HttpStatus.CREATED).body(examenService.asignarExamen(idEstudiante, idExamen));

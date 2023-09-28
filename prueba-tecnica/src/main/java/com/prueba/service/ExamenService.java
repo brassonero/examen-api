@@ -1,11 +1,12 @@
 package com.prueba.service;
 
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 
-import com.prueba.model.dto.CalificacionResponse;
+import com.prueba.model.dto.*;
 import com.prueba.model.entity.*;
 import com.prueba.model.repository.*;
 import lombok.AllArgsConstructor;
@@ -15,6 +16,8 @@ import org.springframework.stereotype.Service;
 import javax.persistence.EntityNotFoundException;
 
 import static com.prueba.constants.Constants.*;
+import static com.prueba.utils.Util.convertToExamenEntity;
+import static com.prueba.utils.Util.convertToExamenResponse;
 
 @Slf4j
 @Service
@@ -26,7 +29,9 @@ public class ExamenService {
     private final RespuestaRepository respuestaRepository;
     private final OpcionRepository opcionRepository;
 
-    public Examen crearExamen(Examen examen) {
+    public ExamenResponse crearExamen(ExamenRequest request) {
+
+        Examen examen = convertToExamenEntity(request);
 
         int numeroDePreguntas = examen.getPreguntas().size();
         if (numeroDePreguntas == 0) throw new IllegalArgumentException("El examen debe tener al menos una pregunta.");
@@ -43,8 +48,9 @@ public class ExamenService {
             }
         }
 
+        SecureRandom secureRandom = new SecureRandom();
         for (int i = 0; i < puntosExtras; i++) {
-            int index = RANDOM.nextInt(preguntas.size());
+            int index = secureRandom.nextInt(preguntas.size());
             Pregunta pregunta = preguntas.get(index);
             pregunta.setPuntaje(pregunta.getPuntaje() + 1);
         }
@@ -57,10 +63,27 @@ public class ExamenService {
         ZonedDateTime bogotaZonedDateTime = now.atZone(bogotaZoneId);
         examen.setFechaExamen(bogotaZonedDateTime.toLocalDateTime());
 
-        return examenRepository.save(examen);
+        Examen savedExamen = examenRepository.save(examen);
+        return convertToExamenResponse(savedExamen);
     }
 
-    public Asignacion asignarExamen(Long idEstudiante, Long idExamen) {
+    public EstudianteResponse crearEstudiante(EstudianteRequest request) {
+
+        Estudiante estudiante = new Estudiante();
+        estudiante.setNombre(request.getNombre());
+        estudiante.setEdad(request.getEdad());
+        estudiante.setCiudad(request.getCiudad());
+        estudiante.setZonaHoraria(request.getZonaHoraria());
+
+        Estudiante savedEstudiante = estudianteRepository.save(estudiante);
+
+        return EstudianteResponse.builder()
+                .id(savedEstudiante.getId())
+                .nombre(savedEstudiante.getNombre())
+                .build();
+    }
+
+    public AsignacionResponse asignarExamen(Long idEstudiante, Long idExamen) {
 
         Estudiante estudiante = estudianteRepository.findById(idEstudiante)
                 .orElseThrow(() -> new RuntimeException(STUDENT_NOT_FOUND));
@@ -70,7 +93,20 @@ public class ExamenService {
         Asignacion asignacion = new Asignacion();
         asignacion.setEstudiante(estudiante);
         asignacion.setExamen(examen);
-        return asignacionRepository.save(asignacion);
+
+        Asignacion savedAssign = asignacionRepository.save(asignacion);
+
+        return AsignacionResponse.builder()
+                .id(savedAssign.getId())
+                .examen(ExamenResponse.builder()
+                        .id(savedAssign.getExamen().getId())
+                        .fechaExamen(savedAssign.getExamen().getFechaExamen())
+                        .build())
+                .estudiante(EstudianteResponse.builder()
+                        .id(savedAssign.getExamen().getId())
+                        .nombre(savedAssign.getEstudiante().getNombre())
+                        .build())
+                .build();
     }
 
     public void guardarRespuestas(Long idEstudiante, Long idExamen, List<Long> idOpciones) {

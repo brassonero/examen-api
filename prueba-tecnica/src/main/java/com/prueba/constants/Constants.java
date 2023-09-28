@@ -1,12 +1,8 @@
 package com.prueba.constants;
 
-import java.util.Random;
-
 public class Constants {
-
     private Constants() {}
 
-    public static final Random RANDOM = new Random();
     public static final String STUDENT_NOT_FOUND = "Estudiante no encontrado";
     public static final String EXAM_NOT_FOUND = "Examen no encontrado";
 
