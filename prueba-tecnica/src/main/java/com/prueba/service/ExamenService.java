@@ -25,13 +25,14 @@ import static com.prueba.utils.Util.convertToExamenEntity;
 @Slf4j
 @Service
 @AllArgsConstructor
-public class ExamenService {
+public class ExamenService implements IExamenService {
     private final ExamenRepository examenRepository;
     private final EstudianteRepository estudianteRepository;
     private final AsignacionRepository asignacionRepository;
     private final RespuestaRepository respuestaRepository;
     private final OpcionRepository opcionRepository;
 
+    @Override
     public ExamenResponse crearExamen(ExamenRequest request) {
 
         Examen examen = convertToExamenEntity(request);
@@ -86,6 +87,7 @@ public class ExamenService {
                 .build();
     }
 
+    @Override
     public EstudianteResponse crearEstudiante(EstudianteRequest request) {
 
         Estudiante estudiante = new Estudiante();
@@ -104,6 +106,7 @@ public class ExamenService {
                 .build();
     }
 
+    @Override
     public AsignacionResponse asignarExamen(Long idEstudiante, Long idExamen) {
 
         log.info("Asignando examen [{}] al estudiante [{}].", idExamen, idEstudiante);
@@ -133,6 +136,7 @@ public class ExamenService {
                 .build();
     }
 
+    @Override
     public void guardarRespuestas(Long idEstudiante, Long idExamen, List<Long> idOpciones) {
 
         log.info("Guardando respuestas...");
@@ -162,6 +166,7 @@ public class ExamenService {
         log.info("Respuestas guardadas exitosamente.");
     }
 
+    @Override
     public CalificacionResponse calcularPuntaje(Long idEstudiante, Long idExamen) {
 
         log.info("Calculando puntaje para el estudiante [{}] y examen [{}].", idEstudiante, idExamen);
