@@ -4,7 +4,10 @@ import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.IntStream;
 
 import com.prueba.model.dto.*;
 import com.prueba.model.entity.*;
@@ -33,30 +36,37 @@ public class ExamenService {
 
         Examen examen = convertToExamenEntity(request);
 
-        int numeroDePreguntas = examen.getPreguntas().size();
-        if (numeroDePreguntas == 0) throw new IllegalArgumentException("El examen debe tener al menos una pregunta.");
+        int numeroDePreguntas = Optional.ofNullable(examen.getPreguntas()).orElse(Collections.emptyList()).size();
+
+        if (numeroDePreguntas == 0){
+            throw new IllegalArgumentException("El examen debe tener al menos una pregunta.");
+        }
 
         int puntajeBase = 100 / numeroDePreguntas;
         int puntosExtras = 100 % numeroDePreguntas;
 
-        List<Pregunta> preguntas = examen.getPreguntas();
-        for (Pregunta pregunta : preguntas) {
+        Optional.ofNullable(examen.getPreguntas()).ifPresent(preguntas -> preguntas.forEach(pregunta -> {
             pregunta.setExamen(examen);
             pregunta.setPuntaje(puntajeBase);
-            for (Opcion opcion : pregunta.getOpciones()) {
-                opcion.setPregunta(pregunta);
-            }
-        }
+            Optional.ofNullable(pregunta.getOpciones()).ifPresent(opciones -> opciones.forEach(opcion -> opcion.setPregunta(pregunta)));
+        }));
 
         SecureRandom secureRandom = new SecureRandom();
-        for (int i = 0; i < puntosExtras; i++) {
-            int index = secureRandom.nextInt(preguntas.size());
-            Pregunta pregunta = preguntas.get(index);
+        IntStream.range(0, puntosExtras).forEach(i -> {
+            int index = secureRandom.nextInt(Optional.ofNullable(examen.getPreguntas()).orElse(Collections.emptyList()).size());
+            Pregunta pregunta = examen.getPreguntas().get(index);
             pregunta.setPuntaje(pregunta.getPuntaje() + 1);
-        }
+        });
 
-        int totalPuntos = preguntas.stream().mapToInt(Pregunta::getPuntaje).sum();
-        if (totalPuntos != 100) throw new IllegalArgumentException("Los puntajes de las preguntas deben sumar 100.");
+        int totalPuntos = Optional.ofNullable(examen.getPreguntas())
+                .orElse(Collections.emptyList())
+                .stream()
+                .mapToInt(Pregunta::getPuntaje)
+                .sum();
+
+        if (totalPuntos != 100) {
+            throw new IllegalArgumentException("Los puntajes de las preguntas deben sumar 100.");
+        }
 
         LocalDateTime now = LocalDateTime.now();
         ZoneId bogotaZoneId = ZoneId.of("America/Bogota");
@@ -118,8 +128,7 @@ public class ExamenService {
             throw new EntityNotFoundException(EXAM_NOT_FOUND);
         }
 
-        for (Long idOpcion : idOpciones) {
-
+        idOpciones.forEach(idOpcion -> {
             Opcion opcion = opcionRepository.findById(idOpcion)
                     .orElseThrow(() -> new EntityNotFoundException("Opción no encontrada"));
 
@@ -133,7 +142,7 @@ public class ExamenService {
             respuesta.setPregunta(opcion.getPregunta());
 
             respuestaRepository.save(respuesta);
-        }
+        });
     }
 
     public CalificacionResponse calcularPuntaje(Long idEstudiante, Long idExamen) {

@@ -45,8 +45,8 @@ public class ExamenController {
     public ResponseEntity<Void> collectAnswers(
             @RequestParam Long idEstudiante,
             @RequestParam Long idExamen,
-            @RequestBody List<Long> opcionesIds) {
-        examenService.guardarRespuestas(idEstudiante, idExamen, opcionesIds);
+            @RequestBody List<Long> idOpciones) {
+        examenService.guardarRespuestas(idEstudiante, idExamen, idOpciones);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
